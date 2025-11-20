@@ -27,6 +27,7 @@ public class EmployeeScheduleMulti {
                     break;
                 case "4":
                     schedule.displaySchedule();
+                    break;
                 case "5":
                     System.out.println("Exiting program...");
                     return;

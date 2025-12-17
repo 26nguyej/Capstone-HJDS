@@ -64,9 +64,13 @@ public class EmployeeScheduleMulti {
             employees = validateEmployeeList(scanner.nextLine());
         }
     
-        // Convert LocalDate to String to match Schedule.addDay method
+        // Add to linked list version
         schedule.addDay(date.toString(), employees);
+    
+        // Add to TreeMap version (ChatGPT-assisted)
+        scheduleMap.addDay(date, employees);
     }
+    
     
     
 
@@ -120,20 +124,25 @@ public class EmployeeScheduleMulti {
     }
 
 
-    public static void main(String[] args) { // Main method to test interactive input functionality and schedule 
+    public static void main(String[] args) {
         EmployeeScheduleMulti app = new EmployeeScheduleMulti();
-
-        // Add some sample data
+    
+        // Add sample data to linked list
         app.schedule.addDay("2025-10-06", "Jacob, Daniel");
         app.schedule.addDay("2025-10-07", "Keller");
         app.schedule.addDay("2025-10-08", "Matthew, Jacob");
+    
+        // Add same data to TreeMap
+        app.scheduleMap.addDay(LocalDate.parse("2025-10-06"), "Jacob, Daniel");
+        app.scheduleMap.addDay(LocalDate.parse("2025-10-07"), "Keller");
+        app.scheduleMap.addDay(LocalDate.parse("2025-10-08"), "Matthew, Jacob");
+    
+        // Launch GUI (ChatGPT-assisted)
+        new EmployeeScheduleGUI(app.schedule);
 
-        System.out.println("=== INITIAL SCHEDULE ===");
-        app.schedule.displaySchedule();
-
-        // Start interactive input
-        app.chooseFunction();
     }
+    
+    
 }
 
 class DayNode { // Node class to construct a day in the schedule
@@ -165,6 +174,17 @@ class Schedule { // Employee schedule class
         return false;
     }
 
+    public String getEmployees(String date) {
+        DayNode current = head;
+        while (current != null) {
+            if (current.date.equals(date)) {
+                return current.employees;
+            }
+            current = current.next;
+        }
+        return "";
+    }
+    
     void addDay(String date, String employees) {
 
         // Added with assistance from ChatGPT:

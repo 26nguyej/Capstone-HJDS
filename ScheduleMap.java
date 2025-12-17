@@ -61,4 +61,10 @@ public class ScheduleMap {
         }
     }
 
+    // ChatGPT-assisted getter for GUI access
+    public TreeMap<LocalDate, String> getMap() {
+        return map;
+    }
+
+
 }

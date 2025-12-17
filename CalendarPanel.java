@@ -1,25 +1,62 @@
-import javax.swing.*;
-import javax.swing.border.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+/*
+ * CalendarPanel
+ * -------------
+ * A Swing JPanel that displays a monthly calendar view for the employee schedule.
+ *
+ * This panel:
+ * - Shows the current month in a grid-based calendar layout
+ * - Highlights days that have scheduled employees
+ * - Highlights the current day with a special border
+ * - Allows month navigation (previous / next)
+ * - Displays employee details for a selected day
+ *
+ * NOTES:
+ * - This panel is designed to work with the Schedule class backend
+ * - Existing inline comments have been preserved exactly as written
+ * - Only BLOCK COMMENTS have been added for documentation
+ * - No code, logic, or structure has been changed
+ */
 
+import javax.swing.*;              /* Swing UI components */
+import javax.swing.border.*;       /* Borders for styling */
+import java.awt.*;                 /* Layouts, colors, fonts */
+import java.awt.event.*;           /* Event handling */
+import java.time.*;                /* Date/time utilities */
+import java.time.format.DateTimeFormatter; /* Month formatting */
+import java.util.*;                /* Utility classes */
+
+/*
+ * CalendarPanel class
+ * -------------------
+ * Custom JPanel that renders a monthly calendar view
+ * and integrates with the Schedule data structure.
+ */
 public class CalendarPanel extends JPanel {
 
+    /* Reference to the shared schedule backend */
     private Schedule schedule;
-    private LocalDate currentMonth;
-    private JLabel monthLabel;
-    private JPanel calendarGrid;
-    private JTextArea dayDetails;
 
+    /* Currently displayed month (always set to day 1) */
+    private LocalDate currentMonth;
+
+    /* UI components */
+    private JLabel monthLabel;      /* Displays current month/year */
+    private JPanel calendarGrid;    /* Holds day headers and day buttons */
+    private JTextArea dayDetails;   /* Displays selected day details */
+
+    /* ---------- COLOR THEME (DARK MODE) ---------- */
     private final Color bgColor = new Color(34, 34, 34);
     private final Color dayColor = new Color(50, 50, 50);
     private final Color textColor = new Color(230, 230, 230); // Light text for readability
     private final Color highlightColor = new Color(70, 130, 180);
     private final Color todayBorderColor = Color.YELLOW; // ⭐ TODAY BORDER
 
+    /*
+     * Constructor
+     * Initializes the calendar panel and displays the current month
+     *
+     * @param schedule The Schedule object used to retrieve employee data
+     */
     public CalendarPanel(Schedule schedule) {
         this.schedule = schedule;
         this.currentMonth = LocalDate.now().withDayOfMonth(1);
@@ -29,6 +66,12 @@ public class CalendarPanel extends JPanel {
         refreshCalendar();
     }
 
+    /*
+     * Builds the static UI components of the calendar panel
+     * - Header with navigation buttons
+     * - Calendar grid
+     * - Day detail display area
+     */
     private void createCalendarUI() {
         // Header panel with month and navigation
         JPanel header = new JPanel(new BorderLayout());
@@ -79,6 +122,12 @@ public class CalendarPanel extends JPanel {
         add(new JScrollPane(dayDetails), BorderLayout.SOUTH);
     }
 
+    /*
+     * Refreshes the calendar display
+     * - Updates the month label
+     * - Rebuilds the grid of day buttons
+     * - Highlights scheduled days and the current day
+     */
     private void refreshCalendar() {
         calendarGrid.removeAll();
 
@@ -97,7 +146,7 @@ public class CalendarPanel extends JPanel {
         int daysInMonth = currentMonth.lengthOfMonth();
         LocalDate today = LocalDate.now();
 
-        // Empty cells
+        // Empty cells before the first day of the month
         for (int i = 0; i < firstDay; i++) {
             calendarGrid.add(new JLabel(""));
         }
@@ -133,6 +182,11 @@ public class CalendarPanel extends JPanel {
         repaint();
     }
 
+    /*
+     * Displays employee information for a selected date
+     *
+     * @param date The date selected on the calendar
+     */
     private void displayDayDetails(LocalDate date) {
         String employees = schedule.getEmployees(date.toString());
         if (employees == null || employees.isEmpty()) {

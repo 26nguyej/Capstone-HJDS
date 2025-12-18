@@ -194,3 +194,26 @@ Computer Science Capstone Project
 ## License
 
 This project is intended for educational use. No commercial license is applied.
+
+## Research Foundation & Source Integration
+
+This project is informed by multiple reputable sources that guided design decisions for data structures, GUI implementation, and scheduling logic:
+
+1. **Data Structures and Linked Lists**  
+   **Reference:** University of California, Berkeley – CS 61B: Data Structures  
+   [https://inst.eecs.berkeley.edu/~cs61b/fa21/schedule.html](https://inst.eecs.berkeley.edu/~cs61b/fa21/schedule.html)  
+   **Summary:** This course resource provides foundational knowledge of linked list structures, their traversal, insertion, and deletion operations. The `Schedule` linked list backend in this project directly applies these principles to manage schedule entries efficiently while practicing custom data structure implementation.
+
+2. **Java Collections Framework and TreeMap**  
+   **Reference:** Oracle Java Tutorials – TreeMap Class  
+   [https://docs.oracle.com/javase/8/docs/api/java/util/TreeMap.html](https://docs.oracle.com/javase/8/docs/api/java/util/TreeMap.html)  
+   **Summary:** The official Java documentation guided the `ScheduleMap` TreeMap implementation. TreeMap’s automatic sorting and key uniqueness features informed the decision to provide a cleaner, built-in alternative to the linked list, ensuring chronological order and preventing duplicate dates.
+
+3. **Human-Computer Interaction and GUI Design**  
+   **Reference:** Stanford University – CS147: Human-Computer Interaction Design  
+   [https://web.stanford.edu/class/cs147/](https://web.stanford.edu/class/cs147/)  
+   **Summary:** Concepts from HCI research were applied to the GUI design, including dark mode for visual comfort, tabbed panes for organized views, and interactive elements (clickable calendar days, responsive input fields). These design decisions improve usability and user experience in line with best practices from academic research.
+
+**Integration into Project:**  
+The above sources informed the choice of backend structures (linked list vs TreeMap), the design of interactive components, and the handling of user input to ensure both functional correctness and a professional GUI. Using these high-quality references strengthened the technical foundation and educational value of the project.
+

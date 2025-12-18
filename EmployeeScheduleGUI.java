@@ -23,6 +23,9 @@ import java.util.HashSet;              /* Used for search deduplication */
 import java.util.List;                 /* Employee list abstraction */
 import java.util.ArrayList;            /* Dynamic list for updates */
 import java.util.Collections;          /* Convert list models */
+import java.util.Date;
+import java.time.ZoneId;
+import java.util.Calendar;
 
 /*
  * Main GUI class responsible for rendering the interface
@@ -161,42 +164,342 @@ public class EmployeeScheduleGUI {
      * Handles adding a new day and its employees
      */
     private void setupAddButton(JButton button, JTextArea outputArea, JFrame frame,
-                                Color textColor, Color spinnerTextColor,
-                                Color buttonColor, Color panelBg) {
-        /* Logic unchanged – documented for clarity */
-        // ... (implementation remains exactly the same)
-    }
+                            Color textColor, Color spinnerTextColor,
+                            Color buttonColor, Color panelBg) {
+
+    button.addActionListener(e -> {
+
+        LocalDate today = LocalDate.now();
+
+        // Independent date spinners
+        JSpinner yearSpinner = new JSpinner(
+                new SpinnerNumberModel(today.getYear(), 2000, 2100, 1)
+        );
+        yearSpinner.setEditor(new JSpinner.NumberEditor(yearSpinner, "####"));
+
+        JSpinner monthSpinner = new JSpinner(
+                new SpinnerNumberModel(today.getMonthValue(), 1, 12, 1)
+        );
+
+        JSpinner daySpinner = new JSpinner(
+                new SpinnerNumberModel(today.getDayOfMonth(), 1, 31, 1)
+        );
+
+        // Employee list
+        DefaultListModel<String> employeeModel = new DefaultListModel<>();
+        JList<String> employeeList = new JList<>(employeeModel);
+        JScrollPane listScroll = new JScrollPane(employeeList);
+
+        JTextField employeeInput = new JTextField();
+        JButton addEmployeeBtn = new JButton("Add Employee");
+        JButton removeEmployeeBtn = new JButton("Remove Selected");
+
+        addEmployeeBtn.addActionListener(ev -> {
+            String name = employeeInput.getText().trim();
+            if (!name.isEmpty()) {
+                employeeModel.addElement(name);
+                employeeInput.setText("");
+            }
+        });
+
+        removeEmployeeBtn.addActionListener(ev -> {
+            int index = employeeList.getSelectedIndex();
+            if (index >= 0) {
+                employeeModel.remove(index);
+            }
+        });
+
+        // Date panel
+        JPanel datePanel = new JPanel(new GridLayout(2, 3, 5, 5));
+        datePanel.add(new JLabel("Year"));
+        datePanel.add(new JLabel("Month"));
+        datePanel.add(new JLabel("Day"));
+        datePanel.add(yearSpinner);
+        datePanel.add(monthSpinner);
+        datePanel.add(daySpinner);
+
+        // Employee controls
+        JPanel employeeControls = new JPanel(new BorderLayout(5, 5));
+        employeeControls.add(employeeInput, BorderLayout.CENTER);
+
+        JPanel employeeButtons = new JPanel(new GridLayout(1, 2, 5, 5));
+        employeeButtons.add(addEmployeeBtn);
+        employeeButtons.add(removeEmployeeBtn);
+
+        employeeControls.add(employeeButtons, BorderLayout.SOUTH);
+
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.add(datePanel, BorderLayout.NORTH);
+        panel.add(listScroll, BorderLayout.CENTER);
+        panel.add(employeeControls, BorderLayout.SOUTH);
+
+        int result = JOptionPane.showConfirmDialog(
+                frame,
+                panel,
+                "Add Schedule Day",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (result == JOptionPane.OK_OPTION) {
+
+            if (employeeModel.isEmpty()) {
+                outputArea.setText("No employees added.");
+                return;
+            }
+
+            int year = (int) yearSpinner.getValue();
+            int month = (int) monthSpinner.getValue();
+            int day = (int) daySpinner.getValue();
+
+            try {
+                LocalDate date = LocalDate.of(year, month, day);
+
+                String employees = String.join(
+                        ", ",
+                        Collections.list(employeeModel.elements())
+                );
+
+                schedule.addDay(date.toString(), employees);
+                outputArea.setText("Added schedule for " + date);
+
+            } catch (Exception ex) {
+                outputArea.setText("Invalid date selected.");
+            }
+        }
+    });
+}
+
+
+
+
 
     /*
      * Handles removing a day from the schedule
      */
     private void setupRemoveButton(JButton button, JTextArea outputArea, JFrame frame,
-                                   Color spinnerTextColor, Color panelBg) {
-        // ... (implementation remains exactly the same)
-    }
+                               Color spinnerTextColor, Color panelBg) {
+
+    button.addActionListener(e -> {
+
+        LocalDate today = LocalDate.now();
+
+        // Independent date spinners
+        JSpinner yearSpinner = new JSpinner(
+                new SpinnerNumberModel(today.getYear(), 2000, 2100, 1)
+        );
+        yearSpinner.setEditor(new JSpinner.NumberEditor(yearSpinner, "####"));
+
+        JSpinner monthSpinner = new JSpinner(
+                new SpinnerNumberModel(today.getMonthValue(), 1, 12, 1)
+        );
+        monthSpinner.setEditor(new JSpinner.NumberEditor(monthSpinner, "##"));
+
+        JSpinner daySpinner = new JSpinner(
+                new SpinnerNumberModel(today.getDayOfMonth(), 1, 31, 1)
+        );
+        daySpinner.setEditor(new JSpinner.NumberEditor(daySpinner, "##"));
+
+        // Date panel
+        JPanel datePanel = new JPanel(new GridLayout(2, 3, 5, 5));
+        datePanel.add(new JLabel("Year"));
+        datePanel.add(new JLabel("Month"));
+        datePanel.add(new JLabel("Day"));
+        datePanel.add(yearSpinner);
+        datePanel.add(monthSpinner);
+        datePanel.add(daySpinner);
+
+        int result = JOptionPane.showConfirmDialog(
+                frame,
+                datePanel,
+                "Remove Schedule Day",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (result == JOptionPane.OK_OPTION) {
+
+            int year = (int) yearSpinner.getValue();
+            int month = (int) monthSpinner.getValue();
+            int day = (int) daySpinner.getValue();
+
+            try {
+                LocalDate date = LocalDate.of(year, month, day);
+                schedule.removeDay(date.toString());
+                outputArea.setText("Removed schedule for " + date);
+
+            } catch (Exception ex) {
+                outputArea.setText("Invalid date selected.");
+            }
+        }
+    });
+}
+
+
 
     /*
      * Handles updating an existing day's employee list
      */
     private void setupUpdateButton(JButton button, JTextArea outputArea, JFrame frame,
-                                   Color textColor, Color spinnerTextColor,
-                                   Color buttonColor, Color panelBg) {
-        // ... (implementation remains exactly the same)
-    }
+                               Color textColor, Color spinnerTextColor,
+                               Color buttonColor, Color panelBg) {
+
+    button.addActionListener(e -> {
+
+        LocalDate today = LocalDate.now();
+
+        // Independent date spinners
+        JSpinner yearSpinner = new JSpinner(
+                new SpinnerNumberModel(today.getYear(), 2000, 2100, 1)
+        );
+        yearSpinner.setEditor(new JSpinner.NumberEditor(yearSpinner, "####"));
+
+        JSpinner monthSpinner = new JSpinner(
+                new SpinnerNumberModel(today.getMonthValue(), 1, 12, 1)
+        );
+        monthSpinner.setEditor(new JSpinner.NumberEditor(monthSpinner, "##"));
+
+        JSpinner daySpinner = new JSpinner(
+                new SpinnerNumberModel(today.getDayOfMonth(), 1, 31, 1)
+        );
+        daySpinner.setEditor(new JSpinner.NumberEditor(daySpinner, "##"));
+
+        // Employee list
+        DefaultListModel<String> employeeModel = new DefaultListModel<>();
+        JList<String> employeeList = new JList<>(employeeModel);
+        JScrollPane listScroll = new JScrollPane(employeeList);
+
+        JTextField employeeInput = new JTextField();
+        JButton addEmployeeBtn = new JButton("Add Employee");
+        JButton removeEmployeeBtn = new JButton("Remove Selected");
+
+        addEmployeeBtn.addActionListener(ev -> {
+            String name = employeeInput.getText().trim();
+            if (!name.isEmpty()) {
+                employeeModel.addElement(name);
+                employeeInput.setText("");
+            }
+        });
+
+        removeEmployeeBtn.addActionListener(ev -> {
+            int index = employeeList.getSelectedIndex();
+            if (index >= 0) {
+                employeeModel.remove(index);
+            }
+        });
+
+        // Date panel
+        JPanel datePanel = new JPanel(new GridLayout(2, 3, 5, 5));
+        datePanel.add(new JLabel("Year"));
+        datePanel.add(new JLabel("Month"));
+        datePanel.add(new JLabel("Day"));
+        datePanel.add(yearSpinner);
+        datePanel.add(monthSpinner);
+        datePanel.add(daySpinner);
+
+        // Employee controls
+        JPanel employeeControls = new JPanel(new BorderLayout(5, 5));
+        employeeControls.add(employeeInput, BorderLayout.CENTER);
+
+        JPanel employeeButtons = new JPanel(new GridLayout(1, 2, 5, 5));
+        employeeButtons.add(addEmployeeBtn);
+        employeeButtons.add(removeEmployeeBtn);
+
+        employeeControls.add(employeeButtons, BorderLayout.SOUTH);
+
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.add(datePanel, BorderLayout.NORTH);
+        panel.add(listScroll, BorderLayout.CENTER);
+        panel.add(employeeControls, BorderLayout.SOUTH);
+
+        int result = JOptionPane.showConfirmDialog(
+                frame,
+                panel,
+                "Update Schedule Day",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (result == JOptionPane.OK_OPTION) {
+
+            if (employeeModel.isEmpty()) {
+                outputArea.setText("No employees entered.");
+                return;
+            }
+
+            int year = (int) yearSpinner.getValue();
+            int month = (int) monthSpinner.getValue();
+            int day = (int) daySpinner.getValue();
+
+            try {
+                LocalDate date = LocalDate.of(year, month, day);
+
+                String employees = String.join(
+                        ", ",
+                        Collections.list(employeeModel.elements())
+                );
+
+                schedule.updateDay(date.toString(), employees);
+                outputArea.setText("Updated schedule for " + date);
+
+            } catch (Exception ex) {
+                outputArea.setText("Invalid date selected.");
+            }
+        }
+    });
+}
+
+
 
     /*
      * Displays the entire schedule in the output area
      */
     private void setupDisplayButton(JButton button, JTextArea outputArea) {
-        // ... (implementation remains exactly the same)
+
+        button.addActionListener(e -> {
+            outputArea.setText("");
+    
+            DayNode current = schedule.head;
+            if (current == null) {
+                outputArea.setText("Schedule is empty.");
+                return;
+            }
+    
+            while (current != null) {
+                outputArea.append(current.date + ": " + current.employees + "\n");
+                current = current.next;
+            }
+        });
     }
+    
 
     /*
      * Searches for an employee across all scheduled days
      */
     private void setupSearchButton(JButton button, JTextArea outputArea) {
-        // ... (implementation remains exactly the same)
+
+        button.addActionListener(e -> {
+            String name = JOptionPane.showInputDialog("Enter employee name:");
+            if (name == null || name.trim().isEmpty()) return;
+    
+            outputArea.setText("");
+            DayNode current = schedule.head;
+            boolean found = false;
+    
+            while (current != null) {
+                if (current.employees.toLowerCase().contains(name.toLowerCase())) {
+                    outputArea.append(name + " works on: " + current.date + "\n");
+                    found = true;
+                }
+                current = current.next;
+            }
+    
+            if (!found) {
+                outputArea.setText("No schedule entries found for: " + name);
+            }
+        });
     }
+    
 
     /*
      * ==========================
